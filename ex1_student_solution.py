@@ -32,8 +32,20 @@ class Solution:
             Homography from source to destination, 3x3 numpy array.
         """
         # return homography
-        """INSERT YOUR CODE HERE"""
-        pass
+
+        # Flip, because x is columns and y is rows:
+        u_src = match_p_src[1, :]
+        v_src = match_p_src[0, :]
+        u_dst = match_p_dst[1, :]
+        v_dst = match_p_dst[0, :]
+
+        homography_size = 9
+        n = len(u_src)
+        A_mat = np.zeros([2 * n, homography_size])
+        for i in range(n):
+            p = np.array([u_src[i], v_src[i], 1])
+            A_mat[2*i, :] = np.concatenate([p, np.zeros_like(p), -u_dst * p])
+            A_mat[2*i+1, :] = np.concatenate([np.zeros_like(p), p, -v_dst * p])
 
     @staticmethod
     def compute_forward_homography_slow(
