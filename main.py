@@ -68,6 +68,7 @@ def main():
     plt.subplot(1,1,1)
     plt.imshow(dst_img)
     plt.scatter(v_tag, u_tag, c='red', s=2)
+    plt.title('Projected points using naive homography')
     plt.show()
 
     # TODO: end code to delete

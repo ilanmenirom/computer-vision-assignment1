@@ -40,10 +40,9 @@ class Solution:
 
     @staticmethod
     def homography_coordinates_convertion(homography: np.ndarray, u: float, v: float) -> Tuple[float, float]:
-        homography_mat = homography.reshape((3,3))
-        p_tag = homography_mat @ np.array([u, v, 1])
+        p_tag = homography @ np.array([u, v, 1])
+        p_tag /= p_tag[2]
         return p_tag[0], p_tag[1]
-
 
     @staticmethod
     def compute_homography_naive(match_p_src: np.ndarray,
@@ -57,13 +56,10 @@ class Solution:
         Returns:
             Homography from source to destination, 3x3 numpy array.
         """
-        # return homography
         a_mat = Solution.compute_homography_equation_mat(match_p_src, match_p_dst)
-
-        # Solve equation A*h=0:
         vals, vecs = np.linalg.eig(np.transpose(a_mat) @ a_mat)
         min_ind = np.argmin(vals)
-        return vecs[min_ind, :]
+        return vecs[:, min_ind].reshape((3, 3))
 
 
     @staticmethod
