@@ -20,6 +20,25 @@ class Solution:
         pass
 
     @staticmethod
+    def compute_homography_equation_mat(match_p_src: np.ndarray,
+                                        match_p_dst: np.ndarray) -> np.ndarray:
+        # Flip, because x is columns and y is rows:
+        u_src = match_p_src[1, :]
+        v_src = match_p_src[0, :]
+        u_dst = match_p_dst[1, :]
+        v_dst = match_p_dst[0, :]
+
+        homography_size = 9
+        n = len(u_src)
+        equation_mat = np.zeros([2 * n, homography_size])
+        for i in range(n):
+            p = np.array([u_src[i], v_src[i], 1])
+            equation_mat[2 * i, :] = np.concatenate([p, np.zeros_like(p), -u_dst[i] * p])
+            equation_mat[2 * i + 1, :] = np.concatenate([np.zeros_like(p), p, -v_dst[i] * p])
+
+        return equation_mat
+
+    @staticmethod
     def compute_homography_naive(match_p_src: np.ndarray,
                                  match_p_dst: np.ndarray) -> np.ndarray:
         """Compute a Homography in the Naive approach, using SVD decomposition.
@@ -32,20 +51,13 @@ class Solution:
             Homography from source to destination, 3x3 numpy array.
         """
         # return homography
+        a_mat = Solution.compute_homography_equation_mat(match_p_src, match_p_dst)
 
-        # Flip, because x is columns and y is rows:
-        u_src = match_p_src[1, :]
-        v_src = match_p_src[0, :]
-        u_dst = match_p_dst[1, :]
-        v_dst = match_p_dst[0, :]
+        # Solve equation A*h=0:
+        vals, vecs = np.linalg.eig(np.transpose(a_mat) @ a_mat)
+        min_ind = np.argmin(vals)
+        return vecs[min_ind, :]
 
-        homography_size = 9
-        n = len(u_src)
-        A_mat = np.zeros([2 * n, homography_size])
-        for i in range(n):
-            p = np.array([u_src[i], v_src[i], 1])
-            A_mat[2*i, :] = np.concatenate([p, np.zeros_like(p), -u_dst[i] * p])
-            A_mat[2*i+1, :] = np.concatenate([np.zeros_like(p), p, -v_dst[i] * p])
 
     @staticmethod
     def compute_forward_homography_slow(
