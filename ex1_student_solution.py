@@ -39,6 +39,13 @@ class Solution:
         return equation_mat
 
     @staticmethod
+    def homography_coordinates_convertion(homography: np.ndarray, u: float, v: float) -> Tuple[float, float]:
+        homography_mat = homography.reshape((3,3))
+        p_tag = homography_mat @ np.array([u, v, 1])
+        return p_tag[0], p_tag[1]
+
+
+    @staticmethod
     def compute_homography_naive(match_p_src: np.ndarray,
                                  match_p_dst: np.ndarray) -> np.ndarray:
         """Compute a Homography in the Naive approach, using SVD decomposition.

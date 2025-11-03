@@ -1,4 +1,6 @@
 import time
+
+import numpy as np  # TODO: remove this line
 import scipy.io
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -53,6 +55,22 @@ def main():
                                                          match_p_dst)
     print('Naive Homography {:5.4f} sec'.format(toc(tt)))
     print(naive_homography)
+
+    # TODO: start code to delete:
+    n = match_p_src.shape[1]
+    u_tag = np.zeros(n)
+    v_tag = np.zeros(n)
+    for ind in range(n):
+        u, v = match_p_src[1, ind], match_p_src[0, ind]
+        u_tag[ind], v_tag[ind] = Solution.homography_coordinates_convertion(naive_homography, u, v)
+
+    plt.figure()
+    plt.subplot(1,1,1)
+    plt.imshow(dst_img)
+    plt.scatter(v_tag, u_tag, c='red', s=2)
+    plt.show()
+
+    # TODO: end code to delete
 
     # Plot naive homography with forward mapping, slow implementation
     tt = time.time()
