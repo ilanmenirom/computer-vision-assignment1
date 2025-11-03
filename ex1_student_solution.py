@@ -44,8 +44,8 @@ class Solution:
         A_mat = np.zeros([2 * n, homography_size])
         for i in range(n):
             p = np.array([u_src[i], v_src[i], 1])
-            A_mat[2*i, :] = np.concatenate([p, np.zeros_like(p), -u_dst * p])
-            A_mat[2*i+1, :] = np.concatenate([np.zeros_like(p), p, -v_dst * p])
+            A_mat[2*i, :] = np.concatenate([p, np.zeros_like(p), -u_dst[i] * p])
+            A_mat[2*i+1, :] = np.concatenate([np.zeros_like(p), p, -v_dst[i] * p])
 
     @staticmethod
     def compute_forward_homography_slow(
