@@ -61,13 +61,12 @@ def main():
     u_tag = np.zeros(n)
     v_tag = np.zeros(n)
     for ind in range(n):
-        u, v = match_p_src[1, ind], match_p_src[0, ind]
+        u, v = match_p_src[0, ind], match_p_src[1, ind]
         u_tag[ind], v_tag[ind] = Solution.homography_coordinates_convertion(naive_homography, u, v)
 
     plt.figure()
-    plt.subplot(1,1,1)
     plt.imshow(dst_img)
-    plt.scatter(v_tag, u_tag, c='red', s=2)
+    plt.scatter(u_tag, v_tag, c='red', s=2)
     plt.title('Projected points using naive homography')
     plt.show()
 

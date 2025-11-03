@@ -22,12 +22,8 @@ class Solution:
     @staticmethod
     def compute_homography_equation_mat(match_p_src: np.ndarray,
                                         match_p_dst: np.ndarray) -> np.ndarray:
-        # Flip, because x is columns and y is rows:
-        u_src = match_p_src[1, :]
-        v_src = match_p_src[0, :]
-        u_dst = match_p_dst[1, :]
-        v_dst = match_p_dst[0, :]
-
+        u_src, v_src = match_p_src[0, :], match_p_src[1, :]
+        u_dst, v_dst = match_p_dst[0, :], match_p_dst[1, :]
         homography_size = 9
         n = len(u_src)
         equation_mat = np.zeros([2 * n, homography_size])
