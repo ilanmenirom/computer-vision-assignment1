@@ -1,6 +1,4 @@
 import time
-
-import numpy as np  # TODO: remove this line
 import scipy.io
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
@@ -56,19 +54,6 @@ def main():
     print('Naive Homography {:5.4f} sec'.format(toc(tt)))
     print(naive_homography)
 
-    # TODO: start code to delete:
-    match_p_dst_est = Solution.homography_coordinates_convertion(naive_homography, match_p_src)
-    plt.figure()
-    plt.imshow(dst_img)
-    plt.scatter(match_p_dst_est[0, :], match_p_dst_est[1, :], c='red', s=2)
-    plt.title('Projected points using naive homography')
-    # plt.show()
-
-    # TODO: end code to delete
-
-    # TODO: return code below:
-    """
-
     # Plot naive homography with forward mapping, slow implementation
     tt = time.time()
     transformed_image = solution.compute_forward_homography_slow(
@@ -81,8 +66,6 @@ def main():
     forward_panorama_slow_plot = plt.imshow(transformed_image)
     plt.title('Forward Homography Slow implementation')
     # plt.show()
-
-    """
 
     # Plot naive homography with forward mapping, fast implementation
     tt = time.time()
@@ -100,8 +83,6 @@ def main():
     # loading data with imperfect matches
     src_img, dst_img, match_p_src, match_p_dst = load_data(False)
 
-    # TODO: return code below:
-    """
     # Compute naive homography
     tt = time.time()
     naive_homography = solution.compute_homography_naive(match_p_src,
@@ -123,7 +104,6 @@ def main():
     forward_panorama_imperfect_matches_plot = plt.imshow(transformed_image_fast)
     plt.title('Forward Panorama imperfect matches')
     # plt.show()
-    """
 
     # Test naive homography
     tt = time.time()
@@ -151,15 +131,6 @@ def main():
                                                      max_err)
     print('RANSAC Homography Test {:5.4f} sec'.format(toc(tt)))
     print([fit_percent, dist_mse])
-
-    # TODO: start code to delete:
-    new_image = Solution.compute_forward_homography_fast(ransac_homography, src_img, dst_img.shape)
-    plt.figure()
-    plt.imshow(new_image)
-    plt.title('Source image projected in destination image coordinates, for RANSAC-homography')
-    plt.show()
-
-    # TODO: end code to delete
 
     # Build panorama
     tt = tic()
