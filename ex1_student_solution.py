@@ -161,6 +161,33 @@ class Solution:
         return new_image
 
     @staticmethod
+    def validate_homography_points(homography: np.ndarray,
+                                   match_p_src: np.ndarray,
+                                   match_p_dst: np.ndarray,
+                                   max_err: float) -> Tuple[np.ndarray, np.ndarray]:
+        """
+        Validate points error after homography convertion
+
+        Args:
+            homography: 3x3 Projective Homography matrix.
+            match_p_src: 2xN points from the source image.
+            match_p_dst: 2xN points from the destination image.
+            max_err: A scalar that represents the maximum distance (in
+            pixels) between the mapped src point to its corresponding dst
+            point, in order to be considered as valid inlier.
+
+        Returns:
+            err: vector size N of each transformed point in match_p_src from the
+            matching point in match_p_dst.
+            inliers_mask: vector size N of whether the error was smaller than max_error.
+        """
+        match_p_dst_est = Solution.homography_coordinates_convertion(homography, match_p_src)
+        err = np.linalg.norm(match_p_dst - match_p_dst_est, axis=0)  # L2 norm, captures actual geometric error
+        inliers_mask = err <= max_err
+        return err, inliers_mask
+
+
+    @staticmethod
     def test_homography(homography: np.ndarray,
                         match_p_src: np.ndarray,
                         match_p_dst: np.ndarray,
@@ -187,9 +214,7 @@ class Solution:
         """
         # return fit_percent, dist_mse
         """INSERT YOUR CODE HERE"""
-        match_p_dst_est = Solution.homography_coordinates_convertion(homography, match_p_src)
-        err = np.linalg.norm(match_p_dst - match_p_dst_est, axis=0)
-        inliers_mask = err <= max_err
+        err, inliers_mask = Solution.validate_homography_points(homography, match_p_src, match_p_dst, max_err)
         fit_percent = np.mean(inliers_mask)
         dist_mse = np.mean(err ** 2) if fit_percent > 0 else 10 ** 9
         return fit_percent, dist_mse
@@ -221,7 +246,11 @@ class Solution:
         """
         # return mp_src_meets_model, mp_dst_meets_model
         """INSERT YOUR CODE HERE"""
-        pass
+        _, inliers_mask = Solution.validate_homography_points(homography, match_p_src, match_p_dst, max_err)
+        mp_src_meets_model = match_p_src[:, inliers_mask]
+        mp_dst_meets_model = match_p_dst[:, inliers_mask]
+        return mp_src_meets_model, mp_dst_meets_model
+
 
     def compute_homography(self,
                            match_p_src: np.ndarray,
