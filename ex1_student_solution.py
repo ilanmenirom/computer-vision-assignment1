@@ -40,10 +40,10 @@ class Solution:
 
         Args:
              homography: 3x3 Projective Homography matrix.
-             coordinates_array: 2xN array of coordinates (N points on 2D plane).
+             coordinates_array: 2xN array of x, y coordinates (N points on 2D plane).
 
          Returns:
-             new coordinates array, 2xN, in the new axis
+             new x, y coordinates array, 2xN, in the new axis
         """
         if len(coordinates_array.shape) == 1:
             coordinates_array = coordinates_array.reshape([-1, 1])  # convert 1D to 2D, for generic calculations
@@ -134,35 +134,22 @@ class Solution:
         Returns:
             The forward homography of the source image to its destination.
         """
-        # TODO: replace this function code
-        # return new_image
-        # Placeholder
-        new_image = np.zeros(shape=dst_image_shape, dtype=np.uint8)
 
-        # Create a meshgrid and reshape to a vector with a third row of 1's:
-        xx, yy = np.meshgrid(range(src_image.shape[1]), range(src_image.shape[0]))
-        combined = np.stack((xx, yy, np.ones(src_image.shape[:2])))
-        combined = combined.reshape((3, -1))
+        h, w, _ = src_image.shape
+        u_mat, v_mat = np.meshgrid(range(h), range(w))
+        u_vec, v_vec = u_mat.reshape([1, -1]), v_mat.reshape([1, -1])
+        p = np.concatenate([v_vec, u_vec], axis=0)
+        p_tag = Solution.homography_coordinates_convertion(homography, p).round().astype(int)
+        converted_img = np.zeros(dst_image_shape).astype(np.uint8)
+        ind = np.arange(p_tag.shape[1])
+        u, v, u_tag, v_tag = u_vec[0, ind], v_vec[0, ind], p_tag[1, ind], p_tag[0, ind]
+        mask = u_tag >= 0
+        mask = np.bitwise_and(mask, u_tag < dst_image_shape[0])
+        mask = np.bitwise_and(mask, v_tag >= 0)
+        mask = np.bitwise_and(mask, v_tag < dst_image_shape[1])
+        converted_img[u_tag[mask], v_tag[mask], :] = src_image[u[mask], v[mask], :]
+        return converted_img
 
-        # Transform all points using homography:
-        coord = np.matmul(homography, combined)
-        coord = np.round(coord / coord[2])[:2, :]
-        copy_data = np.append(coord, combined[:2, :], axis=0).astype(int)
-
-        # Indices as [x_dst, y_dst, x_src, y_src]^T
-        # Note that x,y in camera coordinates is different from numpy axes!
-        # Filter out all pixels outside of destination coordinate range:
-        dropout = copy_data.min(axis=0) >= 0
-        copy_data = copy_data[:, dropout]
-        dropout = copy_data[0, :] < dst_image_shape[1]
-        copy_data = copy_data[:, dropout]
-        dropout = copy_data[1, :] < dst_image_shape[0]
-        copy_data = copy_data[:, dropout]
-
-        # Copy the data from src to dst
-        new_image[copy_data[1, :], copy_data[0, :], :] = src_image[copy_data[3, :], copy_data[2, :], :]
-
-        return new_image
 
     @staticmethod
     def validate_homography_points(homography: np.ndarray,
