@@ -283,8 +283,27 @@ class Solution:
         # # number of RANSAC iterations (+1 to avoid the case where w=1)
         # k = int(np.ceil(np.log(1 - p) / np.log(1 - w ** n))) + 1
         # return homography
-        """INSERT YOUR CODE HERE"""
-        pass
+
+        n = 4  # minimum points to calculate model. 4 for homography
+        minimum_inlier_percent = 0.5
+        best_model, best_err = np.nan, np.nan
+        desired_success_rate = 0.99
+        num_iters = int(np.ceil(np.log(1 - desired_success_rate) / np.log(1 - inliers_percent ** n))) + 1
+        for i in range(num_iters):
+            selected_indices = np.random.choice(match_p_src.shape[1], size=n, replace=False)
+            selected_match_p_src, selected_match_p_dst = match_p_src[:, selected_indices], match_p_dst[:, selected_indices]
+            homography = Solution.compute_homography_naive(selected_match_p_src, selected_match_p_dst)
+            inlier_match_p_src, inlier_match_p_dst = Solution.meet_the_model_points(homography, match_p_src, match_p_dst, max_err)
+            if inlier_match_p_src.shape[1] >= n:
+                homography = Solution.compute_homography_naive(inlier_match_p_src, inlier_match_p_dst)
+                model_inliers_percent, model_err = Solution.test_homography(homography, match_p_src, match_p_dst, max_err)
+                if model_inliers_percent < minimum_inlier_percent or model_err > best_err:
+                    continue
+
+                best_model = homography
+                best_err = model_err
+
+        return best_model
 
     @staticmethod
     def compute_backward_mapping(

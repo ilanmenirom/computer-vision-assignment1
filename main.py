@@ -62,7 +62,7 @@ def main():
     plt.imshow(dst_img)
     plt.scatter(match_p_dst_est[0, :], match_p_dst_est[1, :], c='red', s=2)
     plt.title('Projected points using naive homography')
-    plt.show()
+    # plt.show()  # TODO: return this line
 
     # TODO: end code to delete
 
