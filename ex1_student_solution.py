@@ -35,8 +35,20 @@ class Solution:
         return equation_mat
 
     @staticmethod
-    def homography_coordinates_convertion(homography: np.ndarray, match_p_src: np.ndarray) -> np.ndarray:
-        p = np.concatenate([match_p_src, np.ones((1, match_p_src.shape[1]))], axis=0)
+    def homography_coordinates_convertion(homography: np.ndarray, coordinates_array: np.ndarray) -> np.ndarray:
+        """Convert coordiantes with homography transformation
+
+        Args:
+             homography: 3x3 Projective Homography matrix.
+             coordinates_array: 2xN array of coordinates (N points on 2D plane).
+
+         Returns:
+             new coordinates array, 2xN, in the new axis
+        """
+        if len(coordinates_array.shape) == 1:
+            coordinates_array = coordinates_array.reshape([-1, 1])  # convert 1D to 2D, for generic calculations
+
+        p = np.concatenate([coordinates_array, np.ones((1, coordinates_array.shape[1]))], axis=0)  # 2D array
         p_tag = homography @ p
         p_tag /= p_tag[2]
         return p_tag[0:2, :]
@@ -84,24 +96,16 @@ class Solution:
         """
         # return new_image
         """INSERT YOUR CODE HERE"""
-        # TODO: replace this function code
-        # Create placeholder
-        new_image = np.zeros(shape=dst_image_shape, dtype=np.uint8)
+        converted_img = np.zeros(dst_image_shape).astype(np.uint8)
+        h, w, _ = src_image.shape
+        for u in range(h):
+            for v in range(w):
+                p = np.array([v, u])
+                v_tag, u_tag = Solution.homography_coordinates_convertion(homography, p).round().astype(int)
+                if 0 <= u_tag < h and 0 <= v_tag < w:  # convertion within dst boundaries:
+                    converted_img[u_tag, v_tag, :] = src_image[u, v, :]
 
-        # Scan pixels
-        for row in range(src_image.shape[0]):
-            for col in range(src_image.shape[1]):
-                # Create and transform pixel coordinate:
-                combined = np.ndarray(shape=(3, 1), buffer=np.array([float(col), float(row), 1.0]))
-                coord = np.matmul(homography, combined)
-                coord = np.round(coord / coord[2]).astype(int)[0:2]
-
-                # Only copy contents if pixel indices are within allowed ranges:
-                if 0 <= coord[0] < dst_image_shape[1]:
-                    if 0 <= coord[1] < dst_image_shape[0]:
-                        new_image[coord[1], coord[0], :] = src_image[row, col, :]
-
-        return new_image
+        return converted_img
 
     @staticmethod
     def compute_forward_homography_fast(

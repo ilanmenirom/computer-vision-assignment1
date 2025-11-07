@@ -66,8 +66,6 @@ def main():
 
     # TODO: end code to delete
 
-    # TODO: return code below:
-    """
     # Plot naive homography with forward mapping, slow implementation
     tt = time.time()
     transformed_image = solution.compute_forward_homography_slow(
@@ -80,6 +78,9 @@ def main():
     forward_panorama_slow_plot = plt.imshow(transformed_image)
     plt.title('Forward Homography Slow implementation')
     # plt.show()
+
+    # TODO: return code below:
+    """
 
     # Plot naive homography with forward mapping, fast implementation
     tt = time.time()
