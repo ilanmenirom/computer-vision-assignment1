@@ -207,7 +207,7 @@ class Solution:
         """INSERT YOUR CODE HERE"""
         err, inliers_mask = Solution.validate_homography_points(homography, match_p_src, match_p_dst, max_err)
         fit_percent = np.mean(inliers_mask)
-        dist_mse = np.mean(err ** 2) if fit_percent > 0 else 10 ** 9
+        dist_mse = np.mean(err[inliers_mask] ** 2) if fit_percent > 0 else 10 ** 9
         return fit_percent, dist_mse
 
     @staticmethod
