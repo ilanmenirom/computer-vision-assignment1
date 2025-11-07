@@ -83,7 +83,24 @@ class Solution:
         """
         # return new_image
         """INSERT YOUR CODE HERE"""
-        pass
+        # TODO: replace this function code
+        # Create placeholder
+        new_image = np.zeros(shape=dst_image_shape, dtype=np.uint8)
+
+        # Scan pixels
+        for row in range(src_image.shape[0]):
+            for col in range(src_image.shape[1]):
+                # Create and transform pixel coordinate:
+                combined = np.ndarray(shape=(3, 1), buffer=np.array([float(col), float(row), 1.0]))
+                coord = np.matmul(homography, combined)
+                coord = np.round(coord / coord[2]).astype(int)[0:2]
+
+                # Only copy contents if pixel indices are within allowed ranges:
+                if 0 <= coord[0] < dst_image_shape[1]:
+                    if 0 <= coord[1] < dst_image_shape[0]:
+                        new_image[coord[1], coord[0], :] = src_image[row, col, :]
+
+        return new_image
 
     @staticmethod
     def compute_forward_homography_fast(
@@ -112,9 +129,35 @@ class Solution:
         Returns:
             The forward homography of the source image to its destination.
         """
+        # TODO: replace this function code
         # return new_image
-        """INSERT YOUR CODE HERE"""
-        pass
+        # Placeholder
+        new_image = np.zeros(shape=dst_image_shape, dtype=np.uint8)
+
+        # Create a meshgrid and reshape to a vector with a third row of 1's:
+        xx, yy = np.meshgrid(range(src_image.shape[1]), range(src_image.shape[0]))
+        combined = np.stack((xx, yy, np.ones(src_image.shape[:2])))
+        combined = combined.reshape((3, -1))
+
+        # Transform all points using homography:
+        coord = np.matmul(homography, combined)
+        coord = np.round(coord / coord[2])[:2, :]
+        copy_data = np.append(coord, combined[:2, :], axis=0).astype(int)
+
+        # Indices as [x_dst, y_dst, x_src, y_src]^T
+        # Note that x,y in camera coordinates is different from numpy axes!
+        # Filter out all pixels outside of destination coordinate range:
+        dropout = copy_data.min(axis=0) >= 0
+        copy_data = copy_data[:, dropout]
+        dropout = copy_data[0, :] < dst_image_shape[1]
+        copy_data = copy_data[:, dropout]
+        dropout = copy_data[1, :] < dst_image_shape[0]
+        copy_data = copy_data[:, dropout]
+
+        # Copy the data from src to dst
+        new_image[copy_data[1, :], copy_data[0, :], :] = src_image[copy_data[3, :], copy_data[2, :], :]
+
+        return new_image
 
     @staticmethod
     def test_homography(homography: np.ndarray,
