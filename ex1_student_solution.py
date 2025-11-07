@@ -35,10 +35,11 @@ class Solution:
         return equation_mat
 
     @staticmethod
-    def homography_coordinates_convertion(homography: np.ndarray, u: float, v: float) -> Tuple[float, float]:
-        p_tag = homography @ np.array([u, v, 1])
+    def homography_coordinates_convertion(homography: np.ndarray, match_p_src: np.ndarray) -> np.ndarray:
+        p = np.concatenate([match_p_src, np.ones((1, match_p_src.shape[1]))], axis=0)
+        p_tag = homography @ p
         p_tag /= p_tag[2]
-        return p_tag[0], p_tag[1]
+        return p_tag[0:2, :]
 
     @staticmethod
     def compute_homography_naive(match_p_src: np.ndarray,
@@ -186,7 +187,12 @@ class Solution:
         """
         # return fit_percent, dist_mse
         """INSERT YOUR CODE HERE"""
-        pass
+        match_p_dst_est = Solution.homography_coordinates_convertion(homography, match_p_src)
+        err = np.linalg.norm(match_p_dst - match_p_dst_est, axis=0)
+        inliers_mask = err <= max_err
+        fit_percent = np.mean(inliers_mask)
+        dist_mse = np.mean(err ** 2) if fit_percent > 0 else 10 ** 9
+        return fit_percent, dist_mse
 
     @staticmethod
     def meet_the_model_points(homography: np.ndarray,

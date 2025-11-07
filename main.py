@@ -57,21 +57,17 @@ def main():
     print(naive_homography)
 
     # TODO: start code to delete:
-    n = match_p_src.shape[1]
-    u_tag = np.zeros(n)
-    v_tag = np.zeros(n)
-    for ind in range(n):
-        u, v = match_p_src[0, ind], match_p_src[1, ind]
-        u_tag[ind], v_tag[ind] = Solution.homography_coordinates_convertion(naive_homography, u, v)
-
+    match_p_dst_est = Solution.homography_coordinates_convertion(naive_homography, match_p_src)
     plt.figure()
     plt.imshow(dst_img)
-    plt.scatter(u_tag, v_tag, c='red', s=2)
+    plt.scatter(match_p_dst_est[0, :], match_p_dst_est[1, :], c='red', s=2)
     plt.title('Projected points using naive homography')
     plt.show()
 
     # TODO: end code to delete
 
+    # TODO: return code below:
+    """
     # Plot naive homography with forward mapping, slow implementation
     tt = time.time()
     transformed_image = solution.compute_forward_homography_slow(
@@ -97,10 +93,13 @@ def main():
     forward_panorama_fast_plot = plt.imshow(transformed_image_fast)
     plt.title('Forward Homography Fast implementation')
     # plt.show()
+    """
 
     # loading data with imperfect matches
     src_img, dst_img, match_p_src, match_p_dst = load_data(False)
 
+    # TODO: return code below:
+    """
     # Compute naive homography
     tt = time.time()
     naive_homography = solution.compute_homography_naive(match_p_src,
@@ -122,6 +121,7 @@ def main():
     forward_panorama_imperfect_matches_plot = plt.imshow(transformed_image_fast)
     plt.title('Forward Panorama imperfect matches')
     # plt.show()
+    """
 
     # Test naive homography
     tt = time.time()
